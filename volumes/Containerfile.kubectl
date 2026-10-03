@@ -1,0 +1,7 @@
+from volume:builder
+
+run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
+run chmod +x kubectl
+
+from scratch
+copy --from=0 /build/kubectl /bin/

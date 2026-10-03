@@ -1,0 +1,9 @@
+from volume:builder
+
+run curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz
+run mkdir node
+run tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
+
+from scratch
+
+copy --from=0 /build/node /

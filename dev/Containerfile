@@ -1,0 +1,14 @@
+FROM debian:latest
+
+RUN apt update -y
+RUN apt install -y curl git
+
+COPY entrypoint.sh /entrypoint.sh
+
+RUN useradd -m -u 1000 -s /bin/bash developer
+USER developer
+
+COPY .bashrc /home/developer/.bashrc
+WORKDIR /work
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

@@ -1,0 +1,13 @@
+FROM volume:builder
+
+RUN curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz
+RUN mkdir node
+RUN tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
+
+ENV PATH=$PATH:/build/node/bin
+ENV NPM_CONFIG_PREFIX=/opt/opencode
+RUN npm i -g opencode-ai
+
+FROM scratch
+
+copy --from=0 /opt/opencode /

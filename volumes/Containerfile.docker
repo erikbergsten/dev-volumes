@@ -1,0 +1,7 @@
+from volume:builder
+
+run curl -LO https://download.docker.com/linux/static/stable/aarch64/docker-29.8.2.tgz
+run tar xvf docker-29.8.2.tgz
+
+from scratch
+copy --from=0 /build/docker/ /bin/
