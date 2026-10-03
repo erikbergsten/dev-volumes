@@ -1,9 +1,16 @@
-from volume:builder
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
 
 run curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz
 run mkdir node
 run tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
 
-from scratch
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
+run curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+run mkdir node
+run tar xvf node-v24.21.0-linux-x64.tar.xz -C node --strip-components 1
 
-copy --from=0 /build/node /
+arg TARGETARCH
+from build-${TARGETARCH} as build
+
+from scratch
+copy --from=build /build/node /
