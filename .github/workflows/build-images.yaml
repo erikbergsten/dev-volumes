@@ -9,6 +9,7 @@ env:
   REGISTRY: ghcr.io
   # Converts repository name to lowercase (required for Docker tags)
   IMAGE_REPO: ${{ github.repository }}
+  BUILDER_VERSION: "0.1.0"
 
 jobs:
   build-and-push:
