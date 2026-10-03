@@ -58,8 +58,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.IMAGE_REPO }}/builder:${{ env.BUILDER_VERSION }}
-            ${{ env.IMAGE_REPO }}/builder:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:${{ env.BUILDER_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
