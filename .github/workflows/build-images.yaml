@@ -10,6 +10,7 @@ env:
   # Converts repository name to lowercase (required for Docker tags)
   IMAGE_REPO: ${{ github.repository }}
   BUILDER_VERSION: "0.1.0"
+  NODE_VERSION: "0.1.0"
 
 jobs:
   build-and-push:
@@ -38,17 +39,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ steps.pyproject.outputs.VERSION }}
-            type=sha,format=short
-
       # Build both architectures and push them as a unified 'latest' tag
       - name: Build and push builder image
         uses: docker/build-push-action@v6
@@ -60,7 +50,20 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:${{ env.BUILDER_VERSION }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:latest
-          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build both architectures and push them as a unified 'latest' tag
+      - name: Build and push node image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.node
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/node:${{ env.NODE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/node:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
