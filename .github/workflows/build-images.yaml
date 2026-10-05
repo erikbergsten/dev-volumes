@@ -7,10 +7,13 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # Converts repository name to lowercase (required for Docker tags)
   IMAGE_REPO: ${{ github.repository }}
   BUILDER_VERSION: "0.1.0"
   NODE_VERSION: "0.1.0"
+  DOCKER_VERSION: "0.1.0"
+  KUBECTL_VERSION: "0.1.0"
+  OPENCODE_VERSION: "0.1.0"
+  DEV_VERSION: "0.1.0"
 
 jobs:
   build-and-push:
@@ -39,7 +42,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build both architectures and push them as a unified 'latest' tag
       - name: Build and push builder image
         uses: docker/build-push-action@v6
         with:
@@ -50,10 +52,9 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:${{ env.BUILDER_VERSION }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/builder:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=builder
+          cache-to: type=gha,mode=max,scope=builder
 
-      # Build both architectures and push them as a unified 'latest' tag
       - name: Build and push node image
         uses: docker/build-push-action@v6
         with:
@@ -64,6 +65,57 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/node:${{ env.NODE_VERSION }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/node:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=node
+          cache-to: type=gha,mode=max,scope=node
 
+      - name: Build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.docker
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/docker:${{ env.DOCKER_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/docker:latest
+          cache-from: type=gha,scope=docker
+          cache-to: type=gha,mode=max,scope=docker
+
+      - name: Build and push kubectl image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.kubectl
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/kubectl:${{ env.KUBECTL_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/kubectl:latest
+          cache-from: type=gha,scope=kubectl
+          cache-to: type=gha,mode=max,scope=kubectl
+
+      - name: Build and push opencode image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.opencode
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/opencode:${{ env.OPENCODE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/opencode:latest
+          cache-from: type=gha,scope=opencode
+          cache-to: type=gha,mode=max,scope=opencode
+
+      - name: Build and push dev image
+        uses: docker/build-push-action@v6
+        with:
+          context: dev
+          file: dev/Containerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/dev:${{ env.DEV_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/dev:latest
+          cache-from: type=gha,scope=dev
+          cache-to: type=gha,mode=max,scope=dev

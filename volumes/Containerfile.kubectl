@@ -1,7 +1,15 @@
-from volume:builder
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
 
 run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
 run chmod +x kubectl
 
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
+
+run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+run chmod +x kubectl
+
+arg TARGETARCH
+from build-${TARGETARCH} as build
+
 from scratch
-copy --from=0 /build/kubectl /bin/
+copy --from=build /build/kubectl /bin/

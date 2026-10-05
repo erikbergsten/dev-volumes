@@ -1,13 +1,26 @@
-FROM volume:builder
+FROM ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 AS build-arm64
 
 RUN curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz
 RUN mkdir node
 RUN tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
 
-ENV PATH=$PATH:/build/node/bin
+ENV PATH=/build/node/bin:$PATH
 ENV NPM_CONFIG_PREFIX=/opt/opencode
 RUN npm i -g opencode-ai
 
+FROM ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 AS build-amd64
+
+RUN curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+RUN mkdir node
+RUN tar xvf node-v24.21.0-linux-x64.tar.xz -C node --strip-components 1
+
+ENV PATH=/build/node/bin:$PATH
+ENV NPM_CONFIG_PREFIX=/opt/opencode
+RUN npm i -g opencode-ai
+
+ARG TARGETARCH
+FROM build-${TARGETARCH} AS build
+
 FROM scratch
 
-copy --from=0 /opt/opencode /
+copy --from=build /opt/opencode /
