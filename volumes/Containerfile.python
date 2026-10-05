@@ -1,0 +1,21 @@
+# Latest stable CPython as of 2026-10-05: 3.14.8.
+# These install-only standalone distributions include pip.
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
+
+run curl -fL --retry 3 -o /tmp/python.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.14.8%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+run printf '%s  %s\n' 'ece2bf3d4b47c80c2403c5f32fa51a9458abaee93c10def8acafb5f45163e77d' /tmp/python.tar.gz | sha256sum -c -
+run mkdir -p /build/python && tar -xzf /tmp/python.tar.gz -C /build/python --strip-components=1
+run /build/python/bin/python3 --version && /build/python/bin/python3 -m pip --version
+
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
+
+run curl -fL --retry 3 -o /tmp/python.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.14.8%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+run printf '%s  %s\n' 'd9ec7a6935ade8b671a57ebaf111083d7314eab8dae5071d167054dadd2b97d6' /tmp/python.tar.gz | sha256sum -c -
+run mkdir -p /build/python && tar -xzf /tmp/python.tar.gz -C /build/python --strip-components=1
+run /build/python/bin/python3 --version && /build/python/bin/python3 -m pip --version
+
+arg TARGETARCH
+from build-${TARGETARCH} as build
+
+from scratch
+copy --from=build /build/python /
