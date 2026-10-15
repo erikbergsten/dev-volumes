@@ -2,6 +2,7 @@
 
 features=()
 passthrough=()
+tmux_enabled=0
 supported_features=(node docker opencode kubectl python)
 
 add_feature() {
@@ -22,6 +23,10 @@ add_feature() {
 
 while (($#)); do
   case "$1" in
+    --tmux)
+      tmux_enabled=1
+      shift
+      ;;
     -f|--feature)
       if (($# < 2)); then
         printf 'Missing value for --feature\n' >&2
@@ -73,6 +78,9 @@ dockersupport="--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.so
 
 kubectlsupport="--mount type=bind,src=$KUBECONFIG,dst=/opt/kubeconfig.yaml -e KUBECONFIG=/opt/kubeconfig.yaml"
 cmd="docker run -it --rm -v $PWD:/work -w /work"
+if ((tmux_enabled)); then
+  cmd+=" --mount type=bind,src=/tmp/tmux-1000,dst=/tmp/tmux-1000"
+fi
 
 printf 'Features (%d):\n' "${#features[@]}"
 for feature in "${features[@]}"; do
