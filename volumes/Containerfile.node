@@ -1,13 +1,15 @@
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
+ARG NODE_VERSION="24.21.0"
 
-run curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz
+run curl -LO https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-arm64.tar.xz
 run mkdir node
-run tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
+run tar xvf node-v${NODE_VERSION}-linux-arm64.tar.xz -C node --strip-components 1
 
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
-run curl -LO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+ARG NODE_VERSION="24.21.0"
+run curl -LO https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz
 run mkdir node
-run tar xvf node-v24.21.0-linux-x64.tar.xz -C node --strip-components 1
+run tar xvf node-v${NODE_VERSION}-linux-x64.tar.xz -C node --strip-components 1
 
 arg TARGETARCH
 from build-${TARGETARCH} as build

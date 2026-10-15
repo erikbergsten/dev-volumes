@@ -1,7 +1,7 @@
 FROM debian:latest
 
 RUN apt update -y
-RUN apt install -y curl git
+RUN apt install -y curl git libatomic1
 
 COPY entrypoint.sh /entrypoint.sh
 
