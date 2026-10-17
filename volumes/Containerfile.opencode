@@ -6,7 +6,7 @@ RUN tar xvf node-v24.21.0-linux-arm64.tar.xz -C node --strip-components 1
 
 ENV PATH=/build/node/bin:$PATH
 ENV NPM_CONFIG_PREFIX=/opt/opencode
-RUN npm i -g opencode-ai
+RUN npm i -g opencode-ai@1.19.3
 
 FROM ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 AS build-amd64
 
@@ -16,7 +16,7 @@ RUN tar xvf node-v24.21.0-linux-x64.tar.xz -C node --strip-components 1
 
 ENV PATH=/build/node/bin:$PATH
 ENV NPM_CONFIG_PREFIX=/opt/opencode
-RUN npm i -g opencode-ai
+RUN npm i -g opencode-ai@1.19.3
 
 ARG TARGETARCH
 FROM build-${TARGETARCH} AS build

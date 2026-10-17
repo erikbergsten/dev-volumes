@@ -1,12 +1,20 @@
-from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
+# kubectl from dl.k8s.io as of 2026-10-17: 1.37.1.
+# Pinned instead of tracking stable.txt so the image tag stays truthful.
+arg KUBECTL_VERSION=1.37.1
 
-run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
-run chmod +x kubectl
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
+arg KUBECTL_VERSION
+
+run curl -fL --retry 3 -o /build/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/arm64/kubectl"
+run printf '%s  %s\n' 'ff749f4b78d9c4f1ec87307df9b50119ed819e2094aa9810cb9acffc3286c8c7' /build/kubectl | sha256sum -c -
+run chmod +x /build/kubectl && /build/kubectl version --client
 
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
+arg KUBECTL_VERSION
 
-run curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-run chmod +x kubectl
+run curl -fL --retry 3 -o /build/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+run printf '%s  %s\n' '65691ff77eb6fa44c908b77a1082c9f092c3b9733b5cefabec0d1104890e21a8' /build/kubectl | sha256sum -c -
+run chmod +x /build/kubectl && /build/kubectl version --client
 
 arg TARGETARCH
 from build-${TARGETARCH} as build

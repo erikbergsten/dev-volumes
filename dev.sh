@@ -58,11 +58,12 @@ set -- "${passthrough[@]}"
 registry=ghcr.io/erikbergsten/dev-volumes
 
 dev_image=dev:latest
-node_version=latest
-kubectl_version=latest
-docker_version=latest
-opencode_version=latest
-vibe_version=latest
+node_version=24.21.0
+python_version=3.14.8
+docker_version=29.8.2
+kubectl_version=1.37.1
+opencode_version=1.19.3
+vibe_version=2.26.1
 tmux_version=3.7c
 
 get_version() {
@@ -92,7 +93,11 @@ for feature in "${features[@]}"; do
   if [[ "$feature" == "docker" ]]; then
     cmd+=" $dockersupport"
   elif [[ "$feature" == "kubectl" ]]; then
-    cmd+=" $kubectlsupport"
+    # Only bind the kubeconfig when KUBECONFIG is set; the mount would
+    # otherwise fail with an empty source path.
+    if [[ -n "${KUBECONFIG:-}" ]]; then
+      cmd+=" $kubectlsupport"
+    fi
   elif [[ "$feature" == "vibe" ]]; then
     # --mount type=bind fails if the source is missing, so create it first
     mkdir -p "$HOME/.vibe"
