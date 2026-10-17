@@ -2,8 +2,8 @@
 
 features=()
 passthrough=()
-tmux_enabled=0
-supported_features=(node docker opencode kubectl python vibe)
+debug=0
+supported_features=(node docker opencode kubectl python vibe tmux)
 
 add_feature() {
   local feature=$1
@@ -23,8 +23,8 @@ add_feature() {
 
 while (($#)); do
   case "$1" in
-    --tmux)
-      tmux_enabled=1
+    --debug)
+      debug=1
       shift
       ;;
     -f|--feature)
@@ -63,6 +63,7 @@ kubectl_version=latest
 docker_version=latest
 opencode_version=latest
 vibe_version=latest
+tmux_version=3.7c
 
 get_version() {
   name="$1_version"
@@ -80,12 +81,13 @@ dockersupport="--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.so
 kubectlsupport="--mount type=bind,src=$KUBECONFIG,dst=/opt/kubeconfig.yaml -e KUBECONFIG=/opt/kubeconfig.yaml"
 
 vibesupport="--mount type=bind,src=$HOME/.vibe,dst=/home/developer/.vibe"
-cmd="docker run -it --rm -v $PWD:/work -w /work"
-if ((tmux_enabled)); then
-  cmd+=" --mount type=bind,src=/tmp/tmux-1000,dst=/tmp/tmux-1000"
-fi
 
-printf 'Features (%d):\n' "${#features[@]}"
+tmuxsupport="--mount type=bind,src=/tmp/tmux-$(id -u),dst=/tmp/tmux-1000"
+cmd="docker run -it --rm -v $PWD:/work -w /work"
+
+if ((!debug)); then
+  printf 'Features (%d) - %s\n' "${#features[@]}" "${features[*]}"
+fi
 for feature in "${features[@]}"; do
   if [[ "$feature" == "docker" ]]; then
     cmd+=" $dockersupport"
@@ -95,6 +97,10 @@ for feature in "${features[@]}"; do
     # --mount type=bind fails if the source is missing, so create it first
     mkdir -p "$HOME/.vibe"
     cmd+=" $vibesupport"
+  elif [[ "$feature" == "tmux" ]]; then
+    # --mount type=bind fails if the source is missing, so create it first
+    mkdir -p "/tmp/tmux-$(id -u)"
+    cmd+=" $tmuxsupport"
   fi
   mount=$(get_mount $feature)
   cmd+="  $mount"
@@ -102,4 +108,8 @@ done
 
 cmd="$cmd $@ $registry/$dev_image"
 
-$cmd
+if ((debug)); then
+  printf '%s\n' "$cmd"
+else
+  $cmd
+fi

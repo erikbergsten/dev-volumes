@@ -1,7 +1,7 @@
 FROM debian:latest
 
 RUN apt update -y
-RUN apt install -y curl git tmux
+RUN apt install -y curl git
 
 COPY entrypoint.sh /entrypoint.sh
 
