@@ -3,7 +3,7 @@
 features=()
 passthrough=()
 tmux_enabled=0
-supported_features=(node docker opencode kubectl python)
+supported_features=(node docker opencode kubectl python vibe)
 
 add_feature() {
   local feature=$1
@@ -62,6 +62,7 @@ node_version=latest
 kubectl_version=latest
 docker_version=latest
 opencode_version=latest
+vibe_version=latest
 
 get_version() {
   name="$1_version"
@@ -77,6 +78,8 @@ get_mount() {
 dockersupport="--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --group-add $(stat -c '%g' "/var/run/docker.sock")"
 
 kubectlsupport="--mount type=bind,src=$KUBECONFIG,dst=/opt/kubeconfig.yaml -e KUBECONFIG=/opt/kubeconfig.yaml"
+
+vibesupport="--mount type=bind,src=$HOME/.vibe,dst=/home/developer/.vibe"
 cmd="docker run -it --rm -v $PWD:/work -w /work"
 if ((tmux_enabled)); then
   cmd+=" --mount type=bind,src=/tmp/tmux-1000,dst=/tmp/tmux-1000"
@@ -88,6 +91,10 @@ for feature in "${features[@]}"; do
     cmd+=" $dockersupport"
   elif [[ "$feature" == "kubectl" ]]; then
     cmd+=" $kubectlsupport"
+  elif [[ "$feature" == "vibe" ]]; then
+    # --mount type=bind fails if the source is missing, so create it first
+    mkdir -p "$HOME/.vibe"
+    cmd+=" $vibesupport"
   fi
   mount=$(get_mount $feature)
   cmd+="  $mount"

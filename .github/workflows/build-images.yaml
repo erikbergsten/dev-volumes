@@ -14,6 +14,7 @@ env:
   DOCKER_VERSION: "0.1.0"
   KUBECTL_VERSION: "0.1.0"
   OPENCODE_VERSION: "0.1.0"
+  VIBE_VERSION: "0.1.0"
   DEV_VERSION: "0.1.0"
 
 jobs:
@@ -120,6 +121,19 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/opencode:latest
           cache-from: type=gha,scope=opencode
           cache-to: type=gha,mode=max,scope=opencode
+
+      - name: Build and push vibe image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.vibe
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/vibe:${{ env.VIBE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/vibe:latest
+          cache-from: type=gha,scope=vibe
+          cache-to: type=gha,mode=max,scope=vibe
 
       - name: Build and push dev image
         uses: docker/build-push-action@v6
