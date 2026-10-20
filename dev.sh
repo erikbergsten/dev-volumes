@@ -3,7 +3,7 @@
 features=()
 passthrough=()
 debug=0
-supported_features=(node docker opencode kubectl python vibe tmux)
+supported_features=(node docker opencode kubectl python pnpm vibe tmux)
 
 add_feature() {
   local feature=$1
@@ -59,6 +59,7 @@ registry=ghcr.io/erikbergsten/dev-volumes
 
 dev_image=dev:latest
 node_version=24.21.0
+pnpm_version=12.14.0
 python_version=3.14.8
 docker_version=29.8.2
 kubectl_version=1.37.1

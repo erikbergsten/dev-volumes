@@ -1,0 +1,22 @@
+# Standalone pnpm binary from pnpm/pnpm releases as of 2026-10-17: 12.14.0.
+# Includes an embedded Node runtime, so no separate Node volume is needed;
+# Node versions can be managed inside the container with `pnpm env use`.
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
+
+run curl -fL --retry 3 -o /tmp/pnpm.tar.gz "https://github.com/pnpm/pnpm/releases/download/v12.14.0/pnpm-linux-arm64.tar.gz"
+run printf '%s  %s\n' 'cfc780b9e690549e6633e1045fb1fb6ef84e390711e2099e6ccbae91c32456ea' /tmp/pnpm.tar.gz | sha256sum -c -
+run mkdir -p /build/pnpm/bin && tar -xzf /tmp/pnpm.tar.gz -C /build/pnpm/bin
+run chmod +x /build/pnpm/bin/pnpm && /build/pnpm/bin/pnpm --version
+
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
+
+run curl -fL --retry 3 -o /tmp/pnpm.tar.gz "https://github.com/pnpm/pnpm/releases/download/v12.14.0/pnpm-linux-x64.tar.gz"
+run printf '%s  %s\n' '3910c3852136bed5bc1511b9137a45fd4357ed6b3970d9d08893641e9005867e' /tmp/pnpm.tar.gz | sha256sum -c -
+run mkdir -p /build/pnpm/bin && tar -xzf /tmp/pnpm.tar.gz -C /build/pnpm/bin
+run chmod +x /build/pnpm/bin/pnpm && /build/pnpm/bin/pnpm --version
+
+arg TARGETARCH
+from build-${TARGETARCH} as build
+
+from scratch
+copy --from=build /build/pnpm/bin/ /bin/
