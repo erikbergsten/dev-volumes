@@ -1,0 +1,24 @@
+name: Build kubectl Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.kubectl"
+      - ".github/workflows/build-kubectl.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.kubectl"
+      - ".github/workflows/build-kubectl.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: kubectl
+      version: "1.37.1"
+      file: volumes/Containerfile.kubectl
+      build-args: KUBECTL_VERSION=1.37.1

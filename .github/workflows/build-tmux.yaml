@@ -1,0 +1,24 @@
+name: Build tmux Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.tmux"
+      - ".github/workflows/build-tmux.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.tmux"
+      - ".github/workflows/build-tmux.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: tmux
+      version: "3.7c"
+      file: volumes/Containerfile.tmux
+      build-args: TMUX_VERSION=3.7c

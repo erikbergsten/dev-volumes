@@ -1,0 +1,23 @@
+name: Build node Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.node"
+      - ".github/workflows/build-node.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.node"
+      - ".github/workflows/build-node.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: node
+      version: "24.21.0"
+      file: volumes/Containerfile.node

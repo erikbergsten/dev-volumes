@@ -1,0 +1,23 @@
+name: Build vibe Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.vibe"
+      - ".github/workflows/build-vibe.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.vibe"
+      - ".github/workflows/build-vibe.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: vibe
+      version: "2.26.1"
+      file: volumes/Containerfile.vibe
