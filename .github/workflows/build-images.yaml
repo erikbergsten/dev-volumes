@@ -10,6 +10,7 @@ env:
   IMAGE_REPO: ${{ github.repository }}
   BUILDER_VERSION: "0.1.0"
   NODE_VERSION: "24.21.0"
+  PNPM_VERSION: "12.14.0"
   PYTHON_VERSION: "3.14.8"
   DOCKER_VERSION: "29.8.2"
   KUBECTL_VERSION: "1.37.1"
@@ -70,6 +71,19 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/node:latest
           cache-from: type=gha,scope=node
           cache-to: type=gha,mode=max,scope=node
+
+      - name: Build and push pnpm image
+        uses: docker/build-push-action@v6
+        with:
+          context: volumes
+          file: volumes/Containerfile.pnpm
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/pnpm:${{ env.PNPM_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}/pnpm:latest
+          cache-from: type=gha,scope=pnpm
+          cache-to: type=gha,mode=max,scope=pnpm
 
       - name: Build and push python image
         uses: docker/build-push-action@v6
