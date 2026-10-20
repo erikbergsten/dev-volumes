@@ -1,0 +1,23 @@
+name: Build opencode Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.opencode"
+      - ".github/workflows/build-opencode.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.opencode"
+      - ".github/workflows/build-opencode.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: opencode
+      version: "1.19.3"
+      file: volumes/Containerfile.opencode

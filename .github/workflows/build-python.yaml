@@ -1,0 +1,23 @@
+name: Build python Image
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "volumes/Containerfile.python"
+      - ".github/workflows/build-python.yaml"
+      - ".github/workflows/build-image.yaml"
+  pull_request:
+    paths:
+      - "volumes/Containerfile.python"
+      - ".github/workflows/build-python.yaml"
+      - ".github/workflows/build-image.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: erikbergsten/dev-volumes/.github/workflows/build-image.yaml@master
+    with:
+      image: python
+      version: "3.14.8"
+      file: volumes/Containerfile.python
