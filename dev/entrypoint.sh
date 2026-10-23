@@ -8,8 +8,17 @@ for d in /opt/*/bin/; do
     PATH="$PATH:${d%/}"
 done
 
-# 3. Disable nullglob to return shell behavior to normal
+# 3. The docker CLI does not discover plugins (e.g. `docker compose`) on PATH,
+#    only in its cli-plugins directories. Link any feature image's compose
+#    binary into the user's, which is the first directory searched.
+plugin_dir="$HOME/.docker/cli-plugins"
+mkdir -p "$plugin_dir"
+for p in /opt/*/bin/docker-compose; do
+    ln -sf "$p" "$plugin_dir/docker-compose"
+done
+
+# 4. Disable nullglob to return shell behavior to normal
 shopt -u nullglob
 
-# 2. Hand control over to whatever command was requested (e.g., bash)
+# 5. Hand control over to whatever command was requested (e.g., bash)
 exec "$@"

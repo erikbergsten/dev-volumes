@@ -6,9 +6,16 @@ RUN apt install -y curl git
 COPY entrypoint.sh /entrypoint.sh
 
 RUN useradd -m -u 1000 -s /bin/bash developer
+# Pre-create the vibe home so a named volume mounted at this path inherits
+# developer ownership instead of root; the vibe CLI must be able to write here.
+RUN mkdir -p /home/developer/.vibe && chown developer:developer /home/developer/.vibe
 USER developer
 
 COPY .bashrc /home/developer/.bashrc
 WORKDIR /work
 ENTRYPOINT ["/entrypoint.sh"]
+ENV VIBE_DEFAULT_AGENT=auto-approve
+ENV VIBE_CURSOR_BLINK=false
+ENV VIBE_SKILL_PATHS='["/opt/vibe/skills"]'
+
 CMD ["bash"]

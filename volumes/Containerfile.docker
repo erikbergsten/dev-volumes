@@ -2,14 +2,19 @@ from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
 
 run curl -LO https://download.docker.com/linux/static/stable/aarch64/docker-29.8.2.tgz
 run tar xvf docker-29.8.2.tgz
+run curl -L -o docker-compose https://github.com/docker/compose/releases/download/v5.6.1/docker-compose-linux-aarch64
+run chmod +x docker-compose
 
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
 
 run curl -LO https://download.docker.com/linux/static/stable/x86_64/docker-29.8.2.tgz
 run tar xvf docker-29.8.2.tgz
+run curl -L -o docker-compose https://github.com/docker/compose/releases/download/v5.6.1/docker-compose-linux-x86_64
+run chmod +x docker-compose
 
 arg TARGETARCH
 from build-${TARGETARCH} as build
 
 from scratch
 copy --from=build /build/docker/ /bin/
+copy --from=build /build/docker-compose /bin/docker-compose

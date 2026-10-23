@@ -15,9 +15,9 @@ env:
   DOCKER_VERSION: "29.8.2"
   KUBECTL_VERSION: "1.37.1"
   OPENCODE_VERSION: "1.19.3"
-  VIBE_VERSION: "2.26.1"
+  VIBE_VERSION: "3.0.2"
   TMUX_VERSION: "3.7c"
-  DEV_VERSION: "0.1.0"
+  DEV_VERSION: "0.2.0"
 
 jobs:
   build-and-push:

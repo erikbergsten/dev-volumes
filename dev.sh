@@ -57,14 +57,14 @@ set -- "${passthrough[@]}"
 
 registry=ghcr.io/erikbergsten/dev-volumes
 
-dev_image=dev:latest
+dev_image=dev:0.2.0
 node_version=24.21.0
 pnpm_version=12.14.0
 python_version=3.14.8
 docker_version=29.8.2
 kubectl_version=1.37.1
 opencode_version=1.19.3
-vibe_version=2.26.1
+vibe_version=3.0.2
 tmux_version=3.7c
 
 get_version() {
@@ -82,7 +82,7 @@ dockersupport="--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.so
 
 kubectlsupport="--mount type=bind,src=$KUBECONFIG,dst=/opt/kubeconfig.yaml -e KUBECONFIG=/opt/kubeconfig.yaml"
 
-vibesupport="--mount type=bind,src=$HOME/.vibe,dst=/home/developer/.vibe"
+vibesupport="-e MISTRAL_API_KEY=$MISTRAL_API_KEY"
 
 tmuxsupport="--mount type=bind,src=/tmp/tmux-$(id -u),dst=/tmp/tmux-1000"
 cmd="docker run -it --rm -v $PWD:/work -w /work"
@@ -100,8 +100,6 @@ for feature in "${features[@]}"; do
       cmd+=" $kubectlsupport"
     fi
   elif [[ "$feature" == "vibe" ]]; then
-    # --mount type=bind fails if the source is missing, so create it first
-    mkdir -p "$HOME/.vibe"
     cmd+=" $vibesupport"
   elif [[ "$feature" == "tmux" ]]; then
     # --mount type=bind fails if the source is missing, so create it first

@@ -1,24 +1,44 @@
-# Mistral Vibe CLI standalone binary as of 2026-10-17: 2.26.1.
-# The release zip is a PyInstaller bundle: the vibe executable requires its
-# sibling _internal directory, so both are unpacked into bin/ together.
+# Mistral Vibe CLI as of 2026-10-23: 3.0.2.
+# v3 dropped the standalone CLI binary from GitHub releases; the vibe command
+# is now a Python entry point that execs the bundled Rust binary (vibe-rs).
+# We bundle the Python standalone distribution and pip-install mistral-vibe
+# so the vibe command works when the volume is mounted at /opt/vibe.
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-arm64
 
-run apt update -y && apt install -y unzip
-run curl -fL --retry 3 -o /tmp/vibe.zip "https://github.com/mistralai/mistral-vibe/releases/download/v2.26.1/vibe-linux-aarch64-2.26.1.zip"
-run printf '%s  %s\n' 'bab9ea63437440e819174269f2d192c076380b3026af29f435e1f5018f1f363c' /tmp/vibe.zip | sha256sum -c -
-run mkdir -p /build/vibe/bin && unzip -q /tmp/vibe.zip -d /build/vibe/bin
-run /build/vibe/bin/vibe --version
+run curl -fL --retry 3 -o /tmp/python.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.14.8%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+run printf '%s  %s\n' 'ece2bf3d4b47c80c2403c5f32fa51a9458abaee93c10def8acafb5f45163e77d' /tmp/python.tar.gz | sha256sum -c -
+run mkdir -p /build/python && tar -xzf /tmp/python.tar.gz -C /build/python --strip-components=1
+run /build/python/bin/python3 -m pip install --target /build/vibe-packages mistral-vibe==3.0.2
+run mkdir -p /build/bin
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe"' 'from vibe.cli.launcher import main' 'main()' > /build/bin/vibe
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe-app-server"' 'from vibe.app_server.stdio import main' 'main()' > /build/bin/vibe-app-server
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe-acp"' 'from vibe.acp.entrypoint import main' 'main()' > /build/bin/vibe-acp
+run chmod +x /build/bin/vibe /build/bin/vibe-app-server /build/bin/vibe-acp
+run PYTHONPATH=/build/vibe-packages /build/python/bin/python3 -c "import sys; sys.argv=['vibe','--version']; from vibe.cli.launcher import main; main()"
 
 from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as build-amd64
 
-run apt update -y && apt install -y unzip
-run curl -fL --retry 3 -o /tmp/vibe.zip "https://github.com/mistralai/mistral-vibe/releases/download/v2.26.1/vibe-linux-x86_64-2.26.1.zip"
-run printf '%s  %s\n' '2915db76b12d31589706a3e1c5aac41de32fa6a12d7b2e694df0dd540c09127e' /tmp/vibe.zip | sha256sum -c -
-run mkdir -p /build/vibe/bin && unzip -q /tmp/vibe.zip -d /build/vibe/bin
-run /build/vibe/bin/vibe --version
+run curl -fL --retry 3 -o /tmp/python.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.14.8%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+run printf '%s  %s\n' 'd9ec7a6935ade8b671a57ebaf111083d7314eab8dae5071d167054dadd2b97d6' /tmp/python.tar.gz | sha256sum -c -
+run mkdir -p /build/python && tar -xzf /tmp/python.tar.gz -C /build/python --strip-components=1
+run /build/python/bin/python3 -m pip install --target /build/vibe-packages mistral-vibe==3.0.2
+run mkdir -p /build/bin
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe"' 'from vibe.cli.launcher import main' 'main()' > /build/bin/vibe
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe-app-server"' 'from vibe.app_server.stdio import main' 'main()' > /build/bin/vibe-app-server
+run printf '%s\n' '#!/opt/vibe/python/bin/python3' 'import sys' 'sys.path.insert(0, "/opt/vibe/vibe-packages")' 'sys.argv[0] = "/opt/vibe/bin/vibe-acp"' 'from vibe.acp.entrypoint import main' 'main()' > /build/bin/vibe-acp
+run chmod +x /build/bin/vibe /build/bin/vibe-app-server /build/bin/vibe-acp
+run PYTHONPATH=/build/vibe-packages /build/python/bin/python3 -c "import sys; sys.argv=['vibe','--version']; from vibe.cli.launcher import main; main()"
 
 arg TARGETARCH
 from build-${TARGETARCH} as build
 
+from ghcr.io/erikbergsten/dev-volumes/builder:0.1.0 as git
+
+workdir /repos
+run git clone https://github.com/erikbergsten/vimrc
+
 from scratch
-copy --from=build /build/vibe/bin/ /bin/
+copy --from=build /build/python /python
+copy --from=build /build/vibe-packages /vibe-packages
+copy --from=build /build/bin /bin
+copy --from=git /repos/vimrc/skills /skills
