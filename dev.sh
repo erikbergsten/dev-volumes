@@ -57,7 +57,7 @@ set -- "${passthrough[@]}"
 
 registry=ghcr.io/erikbergsten/dev-volumes
 
-dev_image=dev:0.2.0
+dev_image=dev:0.3.0
 node_version=24.21.0
 pnpm_version=12.14.0
 python_version=3.14.8

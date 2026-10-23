@@ -17,7 +17,7 @@ env:
   OPENCODE_VERSION: "1.19.3"
   VIBE_VERSION: "3.0.2"
   TMUX_VERSION: "3.7c"
-  DEV_VERSION: "0.2.0"
+  DEV_VERSION: "0.3.0"
 
 jobs:
   build-and-push:

@@ -16,7 +16,7 @@ include:
 
 services:
   dev:
-    image: ghcr.io/erikbergsten/dev-volumes/dev:0.2.0
+    image: ghcr.io/erikbergsten/dev-volumes/dev:0.3.0
     working_dir: /work
     volumes:
       - .:/work
