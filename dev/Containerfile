@@ -3,6 +3,8 @@ FROM debian:latest
 RUN apt update -y
 RUN apt install -y curl git
 
+COPY env.sh /usr/local/lib/dev-env.sh
+RUN chmod 644 /usr/local/lib/dev-env.sh
 COPY entrypoint.sh /entrypoint.sh
 
 RUN useradd -m -u 1000 -s /bin/bash developer

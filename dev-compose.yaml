@@ -1,0 +1,40 @@
+# Development overlay for a project's compose.yaml.
+#
+# Copy this file next to your project's compose.yaml and start a dev shell:
+#
+#   docker compose -f dev-compose.yaml run --rm dev
+#
+# Or run everything (project services + dev) in the background and exec in:
+#
+#   docker compose -f dev-compose.yaml up -d
+#   docker compose -f dev-compose.yaml exec dev bash
+#
+# Requires Docker Compose v2.35+ (image volumes, `type: image`).
+
+include:
+  - compose.yaml
+
+services:
+  dev:
+    image: ghcr.io/erikbergsten/dev-volumes/dev:0.2.0
+    working_dir: /work
+    volumes:
+      - .:/work
+      # One entry per feature, mirroring dev.sh's --feature mounts.
+      - type: image
+        source: ghcr.io/erikbergsten/dev-volumes/node:24.21.0
+        target: /opt/node
+      # docker feature: compose cannot stat the socket's gid at parse time,
+      # so pass it in: DOCKER_GID=$(stat -c %g /var/run/docker.sock)
+      # - type: bind
+      #   source: /var/run/docker.sock
+      #   target: /var/run/docker.sock
+    # group_add:
+    #   - "${DOCKER_GID:?set DOCKER_GID=$(stat -c %g /var/run/docker.sock)}"
+    # For the up+exec workflow, replace the image's default `bash` command
+    # so the container stays alive to exec into:
+    # command: sleep infinity
+    # Start project services before the dev shell, e.g.:
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
