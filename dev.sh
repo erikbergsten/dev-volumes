@@ -115,5 +115,12 @@ cmd="$cmd $@ $registry/$dev_image"
 if ((debug)); then
   printf '%s\n' "$cmd"
 else
+  # Image mounts don't auto-pull, so fetch any missing feature images first.
+  for feature in "${features[@]}"; do
+    image="$registry/$feature:$(get_version "$feature")"
+    if ! docker image inspect "$image" >/dev/null 2>&1; then
+      docker pull "$image"
+    fi
+  done
   $cmd
 fi
